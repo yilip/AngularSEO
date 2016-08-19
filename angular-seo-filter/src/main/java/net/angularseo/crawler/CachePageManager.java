@@ -2,9 +2,13 @@ package net.angularseo.crawler;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.common.base.Joiner;
 import net.angularseo.AngularSEOConfig;
 import net.angularseo.SEOFilter;
 import net.angularseo.util.URLUtils;
@@ -42,11 +46,19 @@ public class CachePageManager {
 		try {
 			FileUtils.write(f, pageSource, encoding);
 		} catch (IOException e) {
-			logger.error("Save static page {} failed: {}", name, e.getMessage());
+			logger.warn("Save static page {} failed: {}", name, e.getMessage());
 		}
 	}
 	
-	public static String get(String url) {
+	public static String get(HttpServletRequest req) {
+		String url = req.getRequestURL().toString();
+		if(url.contains("443")) {//https请求
+			url = url.replace(":443", "");
+			url=url.replace("http","https");
+		}
+		if (req.getQueryString() != null) {
+			url += "?" + req.getQueryString();
+		}
 		String pageSource = "<html><body></body></html>";
 		if (instance == null) {
 			return pageSource;
@@ -57,9 +69,14 @@ public class CachePageManager {
 		try {
 			pageSource = FileUtils.readFileToString(f, AngularSEOConfig.getConfig().encoding);
 		} catch (IOException e) {
-			logger.error("Load static page {} failed: {}", name, e.getMessage());
+			logger.warn("Load static page {} failed: {}", name, e.getMessage());
+			final Map<String, String> parameterMap = new HashMap<String, String>();
+			for(Map.Entry<String, String[]> entry : req.getParameterMap().entrySet()) {
+				parameterMap.put(entry.getKey(), entry.getValue() != null ? Joiner.on(',').join(entry.getValue()) : "");
+			}
+			logger.warn(String.format("Exception ocurred for %s, Referer: %s, User-Agent: %s, parameters: %s",
+					req.getRequestURI(), req.getHeader("Referer"), req.getHeader("User-Agent"), parameterMap),  e);
 		}
-		
 		return pageSource;
 	}
 	
@@ -67,7 +84,10 @@ public class CachePageManager {
 	 *  Url name to file name
 	 */
 	public static String u2f(String url) {
-		url = url.replaceFirst("http://[^/]*/?", "/");
+		if(url.contains("https"))
+			url = url.replaceFirst("https://[^/]*/?", "/");
+		else
+			url = url.replaceFirst("https://[^/]*/?", "/");
 		String name = url.replaceAll("[\\\\/:\\*\\?<>|\"]", "_");
 		name += ".html";
 		return name;

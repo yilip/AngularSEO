@@ -3,7 +3,7 @@ package net.angularseo.util;
 import javax.servlet.http.HttpServletRequest;
 
 public class UserAgentUtil {
-	static String DEFAULT_ROBOT_USER_AGENTS = "Googlebot|Mediapartners-Google|AdsBot-Google|bingbot|Baiduspider|yahooseeker";
+	static String DEFAULT_ROBOT_USER_AGENTS = "Googlebot|Mediapartners-Google|AdsBot-Google|bingbot|Baiduspider|yahooseeker|360Spider|YisouSpider|";
 	private static String[] ROBOT_USER_AGENTS = new String[]{};
 	
 	public static void initCustomizeAgents(String robotUserAgent) {
@@ -26,7 +26,11 @@ public class UserAgentUtil {
 				return true;
 			}
 		}
-		
+		//Spider
+		if(userAgent.toUpperCase().endsWith("SPIDER"))
+			return  true;
+		if(userAgent.toUpperCase().endsWith("BOT"))
+			return  true;
 		return false;
 	}
 	

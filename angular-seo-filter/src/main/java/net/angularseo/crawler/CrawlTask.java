@@ -1,5 +1,6 @@
 package net.angularseo.crawler;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -14,8 +15,6 @@ public class CrawlTask extends TimerTask {
 	
 	/**
 	 * The task to crawl static pages
-	 * @param p cache properties
-	 * @param interval unit is hour
 	 */
 	public CrawlTask() {
 	}
@@ -49,12 +48,15 @@ public class CrawlTask extends TimerTask {
 		}
 		
 		// Update the time of this cache
-		manager.updateCachedTime();
+		//manager.updateCachedTime();
 		
 		// Schedule next crawl
 		Timer timer = new Timer();
-		long nextTime = AngularSEOConfig.getConfig().cacheTimeout * 3600 * 1000L;
-        timer.schedule(new CrawlTask(), nextTime);
-		logger.info("AngularSEO crawl task end, and next schedule time is " + new Date(System.currentTimeMillis() + nextTime).toString());
+		//long cacheTimeout = AngularSEOConfig.getConfig().cacheTimeout * 3600 * 1000L;
+		Calendar calendar = Calendar.getInstance();
+		int seconds = calendar.get(Calendar.HOUR_OF_DAY) * 60*60 + calendar.get(Calendar.MINUTE)*60+calendar.get(Calendar.SECOND);
+		long nextTime = (24 * 60*60 - seconds)*1000l ;
+        timer.schedule(new CrawlTask(), nextTime==0?24*60*60*1000l:nextTime);
+		logger.info("AngularSEO crawl task will  work at next day 00:00" );
 	}
 }

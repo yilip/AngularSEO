@@ -4,10 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Properties;
-import java.util.Timer;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -40,8 +37,6 @@ public class CrawlTaskManager {
 	/**
 	 * Schedule the crawl task to crawl the site periodically and generate the static page in the cache path
 	 * 
-	 * @param interval the unit is hour
-	 * @param cachePath
 	 * @throws UnavailableException
 	 */
 	public void schedule() throws UnavailableException {
@@ -62,9 +57,13 @@ public class CrawlTaskManager {
 		loadCacheProperties(cacheFolder);
 		
 		// Check the last cache time
-		long nextTime = getNextTime(cacheFolder, config.cacheTimeout);
+		//long nextTime = getNextTime(cacheFolder, config.cacheTimeout);
+		//凌晨缓存
+		Calendar calendar = Calendar.getInstance();
+		int seconds = calendar.get(Calendar.HOUR_OF_DAY) * 60*60 + calendar.get(Calendar.MINUTE)*60+calendar.get(Calendar.SECOND);
+		long nextTime = (24 * 60*60 - seconds)*1000l ;
 		Timer timer = new Timer();
-		logger.info("AngularSEO crawl task is scheduled on " + new Date(System.currentTimeMillis() + nextTime).toString());
+		logger.info("AngularSEO crawl task will  work at next day 00:00" );
         timer.schedule(new CrawlTask(), nextTime);
 	}
 	

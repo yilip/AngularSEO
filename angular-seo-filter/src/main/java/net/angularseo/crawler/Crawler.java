@@ -96,7 +96,7 @@ public class Crawler implements Runnable {
 					logger.info("Get target url {} of link {}", link, i);
 					links.put(xpath[i], link);
 				} catch (Exception e1) {
-					logger.error("Link " + i + " cannot be found after back and reload, the link will be ignored: " + xpath[i]);
+					logger.warn("Link " + i + " cannot be found after back and reload, the link will be ignored: " + xpath[i]);
 					continue;
 				}
 			}
